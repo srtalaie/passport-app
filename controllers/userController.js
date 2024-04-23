@@ -1,6 +1,41 @@
 const bcrypt = require("bcrypt")
 const userRouter = require("express").Router()
 const User = require("../models/user")
+const passport = require("passport")
+const LocalStrategy = require("passport-local").Strategy
+
+// Passport setup
+passport.use(
+	new LocalStrategy(async (username, password, done) => {
+		try {
+			const user = await User.findOne({ username: username })
+			if (!user) {
+				return done(null, false, { message: "Incorrect username" })
+			}
+
+			if (!(await bcrypt.compare(password, user.passwordHash))) {
+				return done(null, false, { message: "Incorrect password" })
+			}
+
+			return done(null, user)
+		} catch (error) {
+			return done(error)
+		}
+	})
+)
+
+passport.serializeUser((user, done) => {
+	done(null, user.id)
+})
+
+passport.deserializeUser(async (id, done) => {
+	try {
+		const user = await User.findById(id)
+		done(null, user)
+	} catch (err) {
+		done(err)
+	}
+})
 
 // GET User sign-up page
 userRouter.get("/sign-up", async (req, res) => {
@@ -54,6 +89,20 @@ userRouter.post("/sign-up", async (req, res) => {
 
 	res.redirect("/login")
 })
+
+// GET Login page
+userRouter.get("/login", async (req, res) => {
+	res.render("login_form")
+})
+
+// Login as user
+userRouter.post(
+	"/login",
+	passport.authenticate("local", {
+		successRedirect: "/",
+		failureRedirect: "/login",
+	})
+)
 
 // Get Specific User
 userRouter.get("/:id", async (req, res) => {

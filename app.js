@@ -3,11 +3,10 @@ require("dotenv").config()
 const express = require("express")
 const path = require("path")
 const session = require("express-session")
-const passport = require("passport")
-const LocalStrategy = require("passport-local").Strategy
 const mongoose = require("mongoose")
-
+const passport = require("passport")
 const userRouter = require("./controllers/userController")
+const User = require("./models/user")
 
 const mongoDbUri = process.env.MONGODB_URI
 mongoose.connect(mongoDbUri)
@@ -20,7 +19,13 @@ const app = express()
 app.set("views", path.join(__dirname, "views"))
 app.set("view engine", "ejs")
 
-app.use(session({ secret: "cats", resave: false, saveUninitialized: true }))
+app.use(
+	session({
+		secret: process.env.SECRET,
+		resave: false,
+		saveUninitialized: true,
+	})
+)
 app.use(passport.session())
 app.use(express.urlencoded({ extended: false }))
 
