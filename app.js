@@ -6,7 +6,6 @@ const session = require("express-session")
 const mongoose = require("mongoose")
 const passport = require("passport")
 const userRouter = require("./controllers/userController")
-const User = require("./models/user")
 
 const mongoDbUri = process.env.MONGODB_URI
 mongoose.connect(mongoDbUri)
@@ -29,9 +28,7 @@ app.use(
 app.use(passport.session())
 app.use(express.urlencoded({ extended: false }))
 
-app.use("/user", userRouter)
-
-app.get("/", (req, res) => res.render("index"))
+app.use("/", userRouter)
 
 app.listen(3000, () =>
 	console.log("app listening on port 3000!", "http://localhost:3000")

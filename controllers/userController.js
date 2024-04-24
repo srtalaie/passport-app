@@ -37,6 +37,11 @@ passport.deserializeUser(async (id, done) => {
 	}
 })
 
+// GET index page with user info
+userRouter.get("/", (req, res) => {
+	res.render("index", { user: req.user })
+})
+
 // GET User sign-up page
 userRouter.get("/sign-up", async (req, res) => {
 	res.render("sign_up_form")
@@ -104,10 +109,14 @@ userRouter.post(
 	})
 )
 
-// Get Specific User
-userRouter.get("/:id", async (req, res) => {
-	const user = await User.find({ _id: req.params.id })
-	res.json(user)
+// GET user logout
+userRouter.get("/logout", (req, res, next) => {
+	req.logout((err) => {
+		if (err) {
+			return next(err)
+		}
+		res.redirect("/")
+	})
 })
 
 module.exports = userRouter
